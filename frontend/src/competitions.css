@@ -1,0 +1,186 @@
+/* 竞赛预告：沿用 management.css 的卡片语言（白底、1px 边框、12px 圆角、等宽数字），
+   叠加三档倒计时配色。颜色全部来自 .competition-page 上的 --tone / --tone-soft，
+   由卡片与节点行各自的 data-tone 决定，改阈值时只需改 competitions.ts 里的 toneForDays。 */
+.competition-page {
+  --tone-green: #24734f;
+  --tone-green-soft: #e9f5ef;
+  --tone-yellow: #8a5f12;
+  --tone-yellow-soft: #fff4df;
+  --tone-gray: #617085;
+  --tone-gray-soft: #eef1f6;
+}
+
+.competition-page [data-tone='green'] { --tone: var(--tone-green); --tone-soft: var(--tone-green-soft); }
+.competition-page [data-tone='yellow'] { --tone: var(--tone-yellow); --tone-soft: var(--tone-yellow-soft); }
+.competition-page [data-tone='gray'] { --tone: var(--tone-gray); --tone-soft: var(--tone-gray-soft); }
+
+/* ---------- 头部：标题右侧是颜色图例 ---------- */
+.competition-page .mg-heading { align-items: flex-end; }
+.competition-page .competition-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 11px 16px;
+  border: 1px solid var(--mg-line);
+  border-radius: 20px;
+  background: var(--mg-paper);
+}
+.competition-legend span { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; color: #526174; white-space: nowrap; }
+.competition-legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--tone); box-shadow: 0 0 0 3px var(--tone-soft); }
+
+/* ---------- 顶部四张统计卡 ---------- */
+.competition-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 0 0 22px; }
+.competition-metrics article { position: relative; padding: 17px 20px 16px; background: var(--mg-paper); border: 1px solid var(--mg-line); border-radius: 12px; }
+.competition-metrics article[data-tone]::before { content: ''; position: absolute; left: 0; top: 17px; bottom: 17px; width: 3px; border-radius: 3px; background: var(--tone); }
+.competition-metrics span { display: block; font-size: 11px; letter-spacing: .06em; color: var(--mg-muted); }
+.competition-metrics b { display: block; margin: 9px 0 5px; font: 600 30px/1.1 'IBM Plex Mono', monospace; color: var(--tone, var(--mg-ink)); }
+.competition-metrics small { font-size: 11px; color: #8091a5; }
+.competition-metrics .competition-today b { font-size: 19px; color: var(--mg-ink); letter-spacing: -.01em; }
+
+/* ---------- 筛选条 ---------- */
+.competition-page .competition-filters { align-items: end; }
+.competition-filters .mg-button { min-width: 106px; }
+
+/* ---------- 看板：自适应两列，窄屏一列 ---------- */
+.competition-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(370px, 1fr)); gap: 16px; align-items: start; }
+.competition-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 20px 22px 18px 21px;
+  background: var(--mg-paper);
+  border: 1px solid var(--mg-line);
+  border-left: 3px solid var(--tone);
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.competition-card-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 12px; }
+.competition-no { padding-top: 3px; font: 500 11px/1 'IBM Plex Mono', monospace; letter-spacing: .1em; color: #93a1b2; }
+.competition-title { min-width: 0; }
+.competition-title h2 { margin: 0; font-size: 16px; line-height: 1.55; font-weight: 600; color: var(--mg-ink); }
+.competition-title p { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 7px 0 0; font-size: 11px; color: #718298; }
+.competition-title p i { font-style: normal; color: #c3ccd8; }
+
+.competition-count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  min-width: 80px;
+  padding: 8px 12px 9px;
+  border-radius: 10px;
+  background: var(--tone-soft);
+  color: var(--tone);
+}
+.competition-count small { flex-basis: 100%; text-align: center; font-size: 10px; letter-spacing: .1em; opacity: .85; }
+.competition-count b { font: 600 25px/1 'IBM Plex Mono', monospace; }
+.competition-count span { font-size: 11px; }
+
+.competition-intro {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--mg-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- 关键节点：每行自己带颜色 ---------- */
+.competition-phases { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.competition-phases li {
+  display: grid;
+  grid-template-columns: 7px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #f7f9fc;
+  font-size: 12px;
+}
+.competition-phases li[data-state='active'] { background: #f2f7ff; }
+.competition-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--tone); box-shadow: 0 0 0 3px var(--tone-soft); }
+.competition-phase-label { font-weight: 600; color: #3f5468; }
+.competition-phase-span { font-size: 11px; color: #8593a5; }
+.competition-phase-days {
+  justify-self: end;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--tone-soft);
+  color: var(--tone);
+  font: 500 11px/1.5 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+
+/* ---------- 赛期 / 赛制 ---------- */
+.competition-facts { display: grid; gap: 7px; margin: 0; }
+.competition-facts > div { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 9px; }
+.competition-facts dt { font-size: 11px; line-height: 1.95; color: #93a1b2; }
+.competition-facts dd { margin: 0; font-size: 12px; line-height: 1.95; color: #4d5f74; }
+
+/* ---------- 页脚：下一节点 + 官网 ---------- */
+.competition-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 13px;
+  border-top: 1px solid #edf1f5;
+  font-size: 11px;
+  color: #6b7d92;
+}
+.competition-next b { color: #3f5468; }
+.competition-site { color: var(--mg-blue); font-size: 11px; font-weight: 600; text-decoration: none; }
+.competition-site:hover { text-decoration: underline; }
+.competition-site i { font-style: normal; }
+
+.competition-note {
+  margin: 22px 0 0;
+  padding: 14px 18px;
+  border: 1px dashed #d7e0ec;
+  border-radius: 10px;
+  background: #f6f8fc;
+  color: #68798d;
+  font-size: 11px;
+  line-height: 1.9;
+}
+
+@media (max-width: 1180px) {
+  .competition-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .competition-page .mg-heading { display: block; }
+  .competition-page .competition-legend { margin-top: 18px; width: fit-content; }
+  .competition-board { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 650px) {
+  .competition-metrics { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .competition-metrics article { padding: 14px 16px; }
+  .competition-metrics b { font-size: 25px; margin: 7px 0 4px; }
+  .competition-metrics .competition-today b { font-size: 17px; }
+  .competition-page .competition-legend { gap: 10px; padding: 9px 13px; }
+  .competition-card { padding: 16px 16px 14px; gap: 11px; }
+  .competition-card-head { grid-template-columns: auto minmax(0, 1fr); }
+  .competition-count { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; gap: 5px; padding: 7px 11px; }
+  .competition-count small { flex-basis: auto; }
+  .competition-count b { font-size: 21px; }
+  .competition-phases li {
+    grid-template-columns: 7px minmax(0, 1fr) auto;
+    grid-template-areas: 'dot label days' 'dot span days';
+    row-gap: 2px;
+  }
+  .competition-dot { grid-area: dot; align-self: center; }
+  .competition-phase-label { grid-area: label; }
+  .competition-phase-span { grid-area: span; }
+  .competition-phase-days { grid-area: days; align-self: center; }
+  .competition-facts > div { grid-template-columns: minmax(0, 1fr); gap: 1px; }
+  .competition-foot { display: block; }
+  .competition-next { display: block; }
+  .competition-site { display: inline-block; margin-top: 7px; }
+}

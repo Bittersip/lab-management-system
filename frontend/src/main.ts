@@ -4,6 +4,7 @@ import AdminReports from './admin-reports';
 import MemberAdmin from './member-admin';
 import Courses from './courses';
 import DutyAdmin from './duty-admin';
+import CompetitionPreview from './competition-preview';
 import { formatDateTime, formatDate, localDateFromToday, localDateTimeFromNow } from './time';
 import './style.css';
 import './booking.css';
@@ -24,7 +25,7 @@ const blankSections = () => ({ competition: { title: '', detail: '', collaborato
 const reportTitles: Record<string, string> = { competition: '参加竞赛', horizontalProject: '参加教师横向课题', verticalProject: '参加教师纵向课题', learning: '学习内容', reading: '阅读论文、资料和开源项目', outcome: '成果报告', nextWeek: '下周计划' };
 
 const App = {
-  components: { Projects, AdminReports, MemberAdmin, Courses, DutyAdmin },
+  components: { Projects, AdminReports, MemberAdmin, Courses, DutyAdmin, CompetitionPreview },
   setup() {
     const user = ref<any>(null), seats = ref<any[]>([]), notices = ref<any[]>([]), active = ref('home'), error = ref(''), toast = ref(''), loading = ref(false), showRegister = ref(false), showPassword = ref(false);
     const statusLabels: Record<string, string> = { UNCONFIRMED: '未确认成员', MOBILE: '流动成员', REVIEW: '考察成员', ACTIVE: '正式成员', OBSERVATION: '旧观察状态', AVAILABLE: '空闲', OCCUPIED: '已占用', PENDING: '待审核', DISABLED: '已停用', FIXED: '固定工位', APPROVED: '已通过', REJECTED: '未通过', CANCELLED: '已取消', OPEN: '待填写', DRAFT: '草稿', SUBMITTED: '已提交', LATE_SUBMITTED: '迟交', MISSED: '未提交', PLANNED: '待开始', AWAITING_DECISION: '待决策', COMPLETED: '已完成', KEEP_SEAT: '保留工位', MOVE_TO_MOBILE: '转为流动成员', EXEMPTED: '已豁免', EXTEND_REVIEW: '已延长考察' };
@@ -86,6 +87,7 @@ const App = {
         { id: 'notices', icon: '✦', label: '站内信', count: notices.value.filter(n => !n.read_flag).length },
         { id: 'courses', icon: '▤', label: '我的课程表', count: 0 }
       ]),
+      { id: 'competition', icon: '◉', label: '竞赛预告', count: 0 },
       { id: 'projects', icon: '◇', label: '项目团队', count: 0 }
     ]);
     const currentPageTitle = computed(() => navItems.value.find(item => item.id === active.value)?.label || '工作台');
@@ -344,6 +346,7 @@ const App = {
         <AdminReports v-if="active==='adminReports' && isAdmin" :request="api" :review-id="reportReviewId" />
         <DutyAdmin v-if="active==='duty' && isAdmin" :request="api" />
         <Courses v-if="active==='courses' && !isAdmin" :request="api" />
+        <CompetitionPreview v-if="active==='competition'" />
         <Projects v-if="active==='projects'" :request="api" :user="user" :members="members" @changed="refresh" />
         <div v-if="active==='home'" class="page-head"><div><p class="eyebrow">{{ isAdmin?'LAB CONTROL CENTER':'MY WORKSPACE' }}</p><h1>{{ isAdmin?'实验室运行概览':'你好，'+user.name+'。' }}</h1><p>{{ isAdmin?'今天的审批、工位和考察状态都在这里。':'查看你的工位、周报任务和预约记录。' }}</p></div><button class="outline-action" @click="refresh">刷新数据　↻</button></div>
         <div v-if="active==='home' && isAdmin" class="metric-grid"><article><span>空闲流动工位</span><b>{{ overview.availableSeats||0 }}</b><small>可直接分配或开放申请</small></article><article><span>待审核注册</span><b>{{ overview.pendingRegistrations||0 }}</b><small>新成员注册申请</small></article><article><span>进行中考察</span><b>{{ overview.activeReviews||0 }}</b><small>须按周提交材料</small></article><article><span>待人工决策</span><b>{{ overview.awaitingDecision||0 }}</b><small>考察到期成员</small></article></div>
