@@ -51,7 +51,7 @@ for (const role of ['ADMIN', 'MEMBER']) test(`${role}: every feature reachable a
   const api = await installApi(page, role);
   await page.goto('/');
   await expect(page.locator('#workspace-content')).toBeVisible();
-  const ids = role === 'ADMIN' ? ['home','members','seats','applications','reviews','adminReports','duty','logs','projects'] : ['home','seats','booking','reports','special','notices','courses','projects'];
+  const ids = role === 'ADMIN' ? ['home','members','seats','applications','reviews','adminReports','duty','logs','competition','projects'] : ['home','seats','booking','reports','special','notices','courses','competition','projects'];
   for (const id of ids) {
     await navigate(page, id);
     await layout(page);
@@ -311,4 +311,39 @@ test('actions acknowledge immediately and refresh independent member data concur
   releaseReads();
   await expect(page.locator('.request-progress')).toHaveCount(0);
   expect(api.errors).toEqual([]);
+});
+
+test('competition preview tones every card by days to the next milestone', async ({ page }, info) => {
+  await installApi(page, 'MEMBER');
+  await page.goto('/');
+  await navigate(page, 'competition');
+  const cards = page.locator('.competition-card');
+  await expect(cards).toHaveCount(29);
+  // 测试日期冻结在 2026-10-15：绿色（≤7 天）、黄色（7–30 天）、灰色（>30 天）三档都应出现。
+  for (const tone of ['green', 'yellow', 'gray']) {
+    await expect(page.locator(`.competition-card[data-tone="${tone}"]`).first()).toBeVisible();
+  }
+  // 每张卡片都带「还有 / 还剩 N 天」，且卡片主色与天数所在区间一致。
+  const bounds = { green: 7, yellow: 30 };
+  const rows = await cards.evaluateAll(nodes => nodes.map(node => ({
+    tone: node.dataset.tone,
+    days: Number(node.querySelector('.competition-count b')?.textContent || 'NaN'),
+    text: node.querySelector('.competition-count')?.textContent || ''
+  })));
+  expect(rows).toHaveLength(29);
+  for (const row of rows) {
+    expect(row.text).toMatch(/还[有剩]/);
+    expect(Number.isInteger(row.days)).toBe(true);
+    const expected = row.days <= bounds.green ? 'green' : row.days <= bounds.yellow ? 'yellow' : 'gray';
+    expect(row.tone).toBe(expected);
+  }
+  // 每个节点行自带倒计时徽标，未开始的写「还有」。
+  await expect(page.locator('.competition-phases li .competition-phase-days').first()).toContainText(/还有|剩/);
+  await page.getByLabel('紧迫度').selectOption('green');
+  await expect.poll(() => cards.evaluateAll(nodes => nodes.every(node => node.dataset.tone === 'green'))).toBe(true);
+  await layout(page);
+  await saveScreen(page, info, 'member-competition-green');
+  await page.getByRole('button', { name: '重置筛选' }).click();
+  await expect(cards).toHaveCount(29);
+  await layout(page);
 });

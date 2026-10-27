@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>竞赛预告 · 本地验收（模拟数据）</title>
+  </head>
+  <body>
+    <div id="qa"></div>
+    <script type="module">
+      import { createApp } from 'vue';
+      import CompetitionPreview from '/src/competition-preview.ts';
+      import '/src/style.css';
+      import '/src/sidebar.css';
+      import '/src/spacious-workspace.css';
+
+      // ?now=2026-11-05 可以冻结「今天」，用来核对三档颜色；不传则用本机当天。
+      const now = new URLSearchParams(location.search).get('now');
+      const nav = [
+        { id: 'home', icon: '⌂', label: '工作台' },
+        { id: 'seats', icon: '▦', label: '工位与分配' },
+        { id: 'duty', icon: '◈', label: '值班排班' },
+        { id: 'competition', icon: '◉', label: '竞赛预告' },
+        { id: 'projects', icon: '◇', label: '项目团队' }
+      ];
+
+      createApp({
+        components: { CompetitionPreview },
+        setup() {
+          return { now, active: 'competition', nav };
+        },
+        template: `
+          <main class="app-shell">
+            <header class="topbar">
+              <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span><strong>实验室管理系统</strong><small>MEMBER · SEAT · REVIEW</small></span></a>
+              <div class="top-actions"><span class="identity"><i></i>管理员 · ADMIN</span><button class="text-btn">修改密码</button><button class="text-btn">退出</button></div>
+            </header>
+            <section class="workspace">
+              <aside class="sidebar">
+                <p class="sidebar-caption">管理工作台</p>
+                <nav class="sidebar-links">
+                  <button v-for="item in nav" :key="item.id" :data-page="item.id" :class="{ active: active === item.id }">
+                    <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span><span>{{ item.label }}</span>
+                  </button>
+                </nav>
+              </aside>
+              <div class="content"><CompetitionPreview :now="now" /></div>
+            </section>
+          </main>`
+      }).mount('#qa');
+    </script>
+  </body>
+</html>
